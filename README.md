@@ -2,7 +2,12 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/me.qoomon/maven-git-versioning-extension.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22me.qoomon%22%20AND%20a%3A%22maven-git-versioning-extension%22)
 
-[![Build Status](https://travis-ci.com/qoomon/maven-git-versioning-extension.svg?branch=master)](https://travis-ci.com/qoomon/maven-git-versioning-extension)
+[![Build Status](https://travis-ci.org/qoomon/maven-git-versioning-extension.svg?branch=master)](https://travis-ci.org/qoomon/maven-git-versioning-extension)
+
+[Changelog](#changelog)
+
+ℹ Also available as [Gradle Plugin](https://github.com/qoomon/gradle-git-versioning-plugin)
+
 
 This extension will virtually set project versions, based on current **Git branch** or **Git tag**.
 
@@ -92,11 +97,11 @@ Create `${basedir}/.mvn/maven-git-versioning-extension.xml`.
 
 - `${branch}` (only available within branch configuration)
     - The branch name of `HEAD`
-    - e.g. 'master', 'feature-next-big-thing', ...
+    - e.g. 'master', 'feature/next-big-thing', ...
 
 - `${tag}` (only available within tag configuration)
     - The tag name that points at `HEAD`, if multiple tags point at `HEAD` latest version is selected
-    - e.g. 'version/1.0.1', 'version-1.2.3', ...
+    - e.g. 'version/1.0.1', 'v1.2.3', ...
 
 - `${commit}`
     - The `HEAD` commit hash
@@ -120,11 +125,11 @@ Create `${basedir}/.mvn/maven-git-versioning-extension.xml`.
         ```
         
 - `${version}`
-    - `version` set in `build.gradle`
+    - `version` set in `pom.xml`
     - e.g. '1.0.0-SNAPSHOT'
     
 - `${version.release}`
-    - `version` set in `build.gradle` without `-SNAPSHOT` postfix
+    - `version` set in `pom.xml` without `-SNAPSHOT` postfix
     - e.g. '1.0.0'
       
 ### Parameters & Environment Variables
@@ -141,10 +146,10 @@ Create `${basedir}/.mvn/maven-git-versioning-extension.xml`.
 
 ## Provided Project Properties
 
-- `git.ref`
-- `git.branch`
-- `git.tag`
-- `git.commit`
+- `git.ref` value of branch of tag name, always set
+- `git.branch` e.g. 'feature/next-big-thing', only set for branch versioning
+- `git.tag` e.g. 'v1.2.3', only set for tag versioning
+- `git.commit` e.g. '0fc20459a8eceb2c4abb9bf0af45a6e8af17b94b'
 - `git.ref.<PATTERN_GROUP>`
 
 
@@ -161,9 +166,9 @@ execute this snippet before running your `maven` command
 ```shell
 before_script:
   - if [ -n "$CI_COMMIT_TAG" ]; then
-       export GIT_VERSIONING_TAG=$CI_COMMIT_TAG;
+       export VERSIONING_GIT_TAG=$CI_COMMIT_TAG;
     else
-       export GIT_VERSIONING_BRANCH=$CI_COMMIT_REF_NAME;
+       export VERSIONING_GIT_BRANCH=$CI_COMMIT_REF_NAME;
     fi
 ```
 
@@ -171,9 +176,9 @@ before_script:
 execute this snippet before running your `maven` command
 ```shell
 if [[ "$GIT_BRANCH" = origin/tags/* ]]; then e
-    export GIT_VERSIONING_TAG=${GIT_BRANCH#origin/tags/};
+    export VERSIONING_GIT_TAG=${GIT_BRANCH#origin/tags/};
 else 
-    export GIT_VERSIONING_BRANCH=${GIT_BRANCH#origin/};
+    export VERSIONING_GIT_BRANCH=${GIT_BRANCH#origin/};
 fi
 ```
 
@@ -184,3 +189,29 @@ fi
   # integration tests will run with LATEST version of extension installed
   - mvn failsafe:integration-test
 ```
+
+# Changelog
+
+## 4.0.0
+* Major Refactoring, Simplification
+* Alignment to Gradle Plugin
+* New Provided Project Properties**
+  * `git.ref` value of branch of tag name, always set
+### Breaking Changes
+* **Restructured XML Config**
+  * renamed root tag `<configuration>` -> `<gitVersioning>`
+  * removed nested structure
+  * see [Configure Extension](#configure-extension)
+* **Renamed Environment Variables**
+  * `MAVEN_PROJECT_BRANCH` ->  `VERSIONING_GIT_BRANCH`
+  * `MAVEN_PROJECT_TAG` -> `VERSIONING_GIT_TAG`
+* **Renamed Maven Parameters**
+  * `-Dproject.branch` -> `-Dgit.branch`
+  * `-Dproject.tag` -> `-Dgit.tag`
+* **Removed Mave Parameters**
+  * `-DgitVersioning` - disable the extension by a parameter is no longer supported
+* **Renamed Provided Project Properties**
+  * `project.branch` -> `git.branch`
+  * `project.tag` -> `git.tag`
+  * `project.commit` -> `git.commit`
+
