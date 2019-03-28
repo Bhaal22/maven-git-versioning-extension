@@ -1,6 +1,3 @@
 .idea/
-target/
-*.iml
-*.xml.versionsBackup
-.m2
-.git-versioned.pom.xml
+.m2/
+.*-pom.xml
